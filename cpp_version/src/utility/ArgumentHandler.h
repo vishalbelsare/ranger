@@ -60,6 +60,7 @@ public:
   PredictionType predictiontype;
   uint randomsplits;
   std::string splitweights;
+  double tau;
   uint nthreads;
   bool predall;
 
@@ -71,6 +72,7 @@ public:
   std::string file;
   ImportanceMode impmeasure;
   uint targetpartitionsize;
+  uint minbucket;
   uint mtry;
   std::string outprefix;
   bool probability;

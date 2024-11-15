@@ -22,7 +22,7 @@ namespace ranger {
 
 Data::Data() :
     num_rows(0), num_rows_rounded(0), num_cols(0), snp_data(0), num_cols_no_snp(0), externalData(true), index_data(0), max_num_unique_values(
-        0), order_snps(false) {
+        0), order_snps(false), any_na(false) {
 }
 
 size_t Data::getVariableID(const std::string& variable_name) const {
@@ -63,11 +63,11 @@ bool Data::loadFromFile(std::string filename, std::vector<std::string>& dependen
   input_file.close();
   input_file.open(filename);
 
-  // Check if comma, semicolon or whitespace seperated
+  // Check if comma, semicolon or whitespace separated
   std::string header_line;
   getline(input_file, header_line);
 
-  // Find out if comma, semicolon or whitespace seperated and call appropriate method
+  // Find out if comma, semicolon or whitespace separated and call appropriate method
   if (header_line.find(',') != std::string::npos) {
     result = loadFromFileOther(input_file, header_line, dependent_variable_names, ',');
   } else if (header_line.find(';') != std::string::npos) {
@@ -150,7 +150,7 @@ bool Data::loadFromFileWhitespace(std::ifstream& input_file, std::string header_
 }
 
 bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
-    std::vector<std::string>& dependent_variable_names, char seperator) {
+    std::vector<std::string>& dependent_variable_names, char separator) {
 
   size_t num_dependent_variables = dependent_variable_names.size();
   std::vector<size_t> dependent_varIDs;
@@ -160,7 +160,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
   std::string header_token;
   std::stringstream header_line_stream(header_line);
   size_t col = 0;
-  while (getline(header_line_stream, header_token, seperator)) {
+  while (getline(header_line_stream, header_token, separator)) {
     bool is_dependent_var = false;
     for (size_t i = 0; i < dependent_variable_names.size(); ++i) {
       if (header_token == dependent_variable_names[i]) {
@@ -187,7 +187,7 @@ bool Data::loadFromFileOther(std::ifstream& input_file, std::string header_line,
     double token;
     std::stringstream line_stream(line);
     size_t column = 0;
-    while (getline(line_stream, token_string, seperator)) {
+    while (getline(line_stream, token_string, separator)) {
       std::stringstream token_stream(token_string);
       readFromStream(token_stream, token);
 
@@ -224,8 +224,19 @@ void Data::getAllValues(std::vector<double>& all_values, std::vector<size_t>& sa
     for (size_t pos = start; pos < end; ++pos) {
       all_values.push_back(get_x(sampleIDs[pos], varID));
     }
-    std::sort(all_values.begin(), all_values.end());
+    if (any_na) {
+      std::sort(all_values.begin(), all_values.end(), less_nan<double>);
+    } else {
+      std::sort(all_values.begin(), all_values.end());
+    }
     all_values.erase(std::unique(all_values.begin(), all_values.end()), all_values.end());
+    
+    // Keep only one NaN value
+    if (any_na) {
+      while (all_values.size() >= 2 && std::isnan(all_values[all_values.size() - 2])) {
+        all_values.pop_back();
+      }
+    }
   } else {
     // If GWA data just use 0, 1, 2
     all_values = std::vector<double>( { 0, 1, 2 });
@@ -262,17 +273,31 @@ void Data::sort() {
     for (size_t row = 0; row < num_rows; ++row) {
       unique_values[row] = get_x(row, col);
     }
-    std::sort(unique_values.begin(), unique_values.end());
+    
+    if (any_na) {
+      std::sort(unique_values.begin(), unique_values.end(), less_nan<double>);
+    } else {
+      std::sort(unique_values.begin(), unique_values.end());
+    }
     unique_values.erase(unique(unique_values.begin(), unique_values.end()), unique_values.end());
 
     // Get index of unique value
     for (size_t row = 0; row < num_rows; ++row) {
-      size_t idx = std::lower_bound(unique_values.begin(), unique_values.end(), get_x(row, col))
-          - unique_values.begin();
+      size_t idx;
+      if (any_na) {
+        idx = std::lower_bound(unique_values.begin(), unique_values.end(), get_x(row, col), less_nan<double>) - unique_values.begin();
+      } else {
+        idx = std::lower_bound(unique_values.begin(), unique_values.end(), get_x(row, col)) - unique_values.begin();
+      }
       index_data[col * num_rows + row] = idx;
     }
-
-    // Save unique values
+    
+    // Save unique values (keep NaN)
+    if (any_na) {
+      while (unique_values.size() >= 2 && std::isnan(unique_values[unique_values.size() - 2])) {
+        unique_values.pop_back();
+      }
+    }
     unique_data_values.push_back(unique_values);
     if (unique_values.size() > max_num_unique_values) {
       max_num_unique_values = unique_values.size();

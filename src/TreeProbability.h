@@ -87,6 +87,17 @@ private:
   void findBestSplitValueExtraTreesUnordered(size_t nodeID, size_t varID, size_t num_classes,
       const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
       double& best_decrease);
+  
+  void findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+                                const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+                                double& best_decrease);
+  void findBestSplitValueNanSmallQ(size_t nodeID, size_t varID, size_t num_classes,
+                                const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+                                double& best_decrease, const std::vector<double>& possible_split_values, std::vector<size_t>& counter_per_class,
+                                std::vector<size_t>& counter);
+  void findBestSplitValueNanLargeQ(size_t nodeID, size_t varID, size_t num_classes,
+                                const std::vector<size_t>& class_counts, size_t num_samples_node, double& best_value, size_t& best_varID,
+                                double& best_decrease);
 
   void addImpurityImportance(size_t nodeID, size_t varID, double decrease);
 
@@ -105,7 +116,7 @@ private:
   const std::vector<uint>* response_classIDs;
   const std::vector<std::vector<size_t>>* sampleIDs_per_class;
 
-  // Class counts in terminal nodes. Empty for non-terminal nodes.
+  // Class counts in terminal nodes. Empty for non-terminal nodes (except if save_node_stats).
   std::vector<std::vector<double>> terminal_class_counts;
 
   // Splitting weights

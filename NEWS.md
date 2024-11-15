@@ -1,4 +1,58 @@
 
+# ranger 0.17.0
+* New CRAN version
+
+# ranger 0.16.4
+* Add handling of missing values for classification and regression
+
+# ranger 0.16.3
+* Fix a bug for always.split.variables (for some settings)
+
+# ranger 0.16.2
+* Add Poisson splitting rule for regression trees
+
+# ranger 0.16.1
+* Set num.threads=2 as default; respect environment variables and options
+* Add hierarchical shrinkage
+* Allow vector min.node.size and min.bucket for class-specific limits
+
+# ranger 0.16.0
+* New CRAN version
+
+# ranger 0.15.4
+* Add node.stats option to save node statistics of all nodes
+* Add time.interest option to restrict unique survival times (faster and saves memory)
+
+# ranger 0.15.3
+* Fix min bucket option in C++ version
+
+# ranger 0.15.2
+* Fix memory error for always.split.variables in certain settings
+
+# ranger 0.15.1
+* Fix quantile regression for factor variables in "order" mode
+
+# ranger 0.15.0
+* New CRAN version
+
+# ranger 0.14.2
+* Switch to C++14 standard
+* Add min.bucket parameter to restrict terminal node size
+* Fix a bug with always.split.variables selecting the wrong variables
+
+# ranger 0.14.1
+* URL fix for CRAN
+
+# ranger 0.14.0
+* New CRAN version
+
+# ranger 0.13.5
+* Fix weight calculation in case-specific RF (csrf())
+* Add as.data.frame() method for predictions
+
+# ranger 0.13.4
+* Allow split.select.weights and always.split.variables together
+
 # ranger 0.13.3
 * Faster permutation variable importance for high dimensional data (thanks to Roman Hornung)
 
